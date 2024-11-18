@@ -18,7 +18,7 @@ public class Conecta2 implements Jugador, IAuto {
     //atributs
     private String _nom;
     private Boolean _poda;
-    private int _nJugades, _tPartida, _tExplorats, _profMax = 2; //el profe provarà amb profunditat 4 o 8
+    private int _nJugades, _tPartida, _tExplorats, _profMax = 2, _t_ExpT=0; //el profe provarà amb profunditat 4 o 8
    //nJugades representa el nombre de moviments que ha realitzat el jugador Conecta2 en la partida
    //_profMax representa el nivell màxim de profunditat on podem simular amb Conecta2
     //constructor jugador Conecta2
@@ -34,34 +34,36 @@ public class Conecta2 implements Jugador, IAuto {
     }
     
     //metodes de Jugador
-    @Override
-    public int moviment(Tauler t, int color) {
-       //per defecte, throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-       int millor_columna = -1; //inicialitzem amb una columna invàlida 
-       ++_nJugades; // Incrementa el comptador de nombres de jugades al inici de cada moviment pel jugador conecta2
-        _tExplorats = 0; //reiniciem el nombre de taulers explorats al fer el moviment
-        ++_tPartida; 
-        Instant inici = Instant.now();
-        int h_actual = MENYS_INFINIT;  //heuristica trobada durant la exploracio de les possibles jugades en el torn        
-        
-       for (int c = 0; c < t.getMida(); ++c) { //simula totes las possibles jugades que pot realitzar Conecta2
-           Tauler aux = new Tauler(t);
-           aux.afegeix(c, color);
-           int h_minima = MIN(aux, c, _profMax-1, color);
-           if (h_actual <= h_minima) {
-               h_actual = h_minima;
-               millor_columna = c;
-           }
-       }
-        
-        Instant fi = Instant.now();
-        long duracio = Duration.between(inici, fi).getSeconds();
-        System.out.println("> Jugada: " + _nJugades + " amb temps: " + duracio + "s");
-        System.out.println("> Columna triada per tirar la fitxa: " + millor_columna);
-        System.out.println("> Taulers examinats per fer el moviment: " + _tExplorats);
-        System.out.println("> Taulers explorats totals durant la partida: " + _tExplorats);
-        return millor_columna; //retorna la columna on es millor tirar la fitxa pel jugador conecta2 tenint en compte la jugada que faria el nostre adversari
+@Override
+public int moviment(Tauler t, int color) {
+    int millor_columna = -1;
+    ++_nJugades; // Incrementa el número de jugadas
+    _tExplorats = 0; // Reinicia los tableros explorados del turno actual
+    ++_tPartida; // Incrementa el contador de turnos
+    Instant inici = Instant.now();
+    int h_actual = MENYS_INFINIT;
+
+    for (int c = 0; c < t.getMida(); ++c) { // Simula todas las posibles jugadas
+        Tauler aux = new Tauler(t);
+        aux.afegeix(c, color);
+        int h_minima = MIN(aux, c, _profMax - 1, color);
+        if (h_actual <= h_minima) {
+            h_actual = h_minima;
+            millor_columna = c;
+        }
     }
+
+    _t_ExpT += _tExplorats; // Acumula los explorados del turno actual
+    Instant fi = Instant.now();
+    long duracio = Duration.between(inici, fi).getSeconds();
+
+    System.out.println("> Jugada: " + _nJugades + " amb temps: " + duracio + "s.");
+    System.out.println("> Columna triada per tirar la fitxa: " + millor_columna);
+    System.out.println("> Taulers examinats per fer el moviment: " + _tExplorats);
+    System.out.println("> Taulers explorats totals durant la partida: " + _t_ExpT);
+    return millor_columna; // Retorna la millor columna
+}
+
 
     @Override
     public String nom() {
@@ -82,7 +84,7 @@ public class Conecta2 implements Jugador, IAuto {
       private int MIN(Tauler t, int columna, int profunditat, int colorAct) {
           int millor_valor = INFINIT;
           ++_tExplorats;
-          ++_tPartida;
+          //++_tPartida;
           int color = obteUltimColor(t, columna);
           if (t.solucio(columna, color)) return millor_valor;
           else if (profunditat==0 || !t.espotmoure()) {
@@ -122,5 +124,8 @@ public class Conecta2 implements Jugador, IAuto {
           }
           return millor_valor;
       }
+      
+      
+      //HEURISITCA
       
 }
