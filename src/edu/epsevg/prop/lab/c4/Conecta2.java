@@ -44,6 +44,7 @@ public int moviment(Tauler t, int color) {
     int h_actual = MENYS_INFINIT;
 
     for (int c = 0; c < t.getMida(); ++c) { // Simula todas las posibles jugadas
+        if (t.movpossible(c)) {
         Tauler aux = new Tauler(t);
         aux.afegeix(c, color);
         int h_minima = MIN(aux, c, _profMax - 1, color);
@@ -52,7 +53,7 @@ public int moviment(Tauler t, int color) {
             millor_columna = c;
         }
     }
-
+    }
     _t_ExpT += _tExplorats; // Acumula los explorados del turno actual
     Instant fi = Instant.now();
     long duracio = Duration.between(inici, fi).getSeconds();
@@ -91,9 +92,9 @@ public int moviment(Tauler t, int color) {
               return 0;
           } else {
               for (int col = 0; col < t.getMida(); col++) { //// Itera sobre todas las posibles columnas (moviments)
-                  if (t.movpossible(columna)) { //indica si podem posar si o no una fitxa a la columna ma
+                  if (t.movpossible(col)) { //indica si podem posar si o no una fitxa a la columna ma
                       Tauler Taux = new Tauler(t);
-                      Taux.afegeix(columna, -colorAct);
+                      Taux.afegeix(col, -colorAct);
                       int h_a = MAX(Taux, col, profunditat-1, colorAct);
                       millor_valor = Math.min(millor_valor, h_a);
                       
