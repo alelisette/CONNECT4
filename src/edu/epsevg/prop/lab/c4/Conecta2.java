@@ -66,8 +66,8 @@ public class Conecta2 implements Jugador, IAuto {
 
         System.out.println("> Jugada: " + _nJugades + " amb temps: " + duracio + "s.");
         System.out.println("> Columna triada per tirar la fitxa: " + c);
-        System.out.println("> Taulers examinats per fer el moviment: " + _tExplorats);
-        System.out.println("> Taulers explorats totals durant la partida: " + _t_ExpT);
+        System.out.println("> Nodes examinats per fer el moviment: " + _tExplorats);
+        System.out.println("> Nodes explorats totals durant la partida: " + _t_ExpT);
         return millor_columna;
     }
 
