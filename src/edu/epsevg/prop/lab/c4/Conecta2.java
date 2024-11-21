@@ -80,7 +80,6 @@ public class Conecta2 implements Jugador, IAuto {
         int millor_valor = INFINIT;
         ++_tExplorats;
 
-        // Lógica integrada de obteUltimColor
         int color = 0;
         for (int i = t.getMida() - 1; i >= 0; --i) {
             int c = t.getColor(i, columna);
@@ -153,7 +152,8 @@ public class Conecta2 implements Jugador, IAuto {
       
       
       //HEURISITCA MÁS ESTRATÉGICA
-/*
+
+    /*
     private int heuristica(Tauler t, int colorAct) {
     int puntuacion = 0;
     final int FILAS = 8;
@@ -231,7 +231,9 @@ private int evaluarGrupo(Tauler t, int fila, int col, int dirFila, int dirCol, i
     }
 
     return puntuacion;
-} */
+} 
+*/
+/*
 
 private int heuristica(Tauler t, int colorAct) {
     int puntuacion = 0;
@@ -308,6 +310,94 @@ private int evaluarGrupoRapido(Tauler t, int fila, int col, int dirFila, int dir
     }
 
     return 0; // Grupos mixtos no se valoran
+} */
+
+    
+    //millor heuristica
+    private int heuristica(Tauler t, int colorAct) {
+    int puntuacion = 0;
+    int mida = t.getMida(); // Tamaño del tablero cuadrado (8x8)
+    int oponente = -colorAct; // Color contrario al actual
+
+    // Prioridad al centro
+    int columnaCentral = mida / 2;
+    for (int fila = 0; fila < mida; fila++) {
+        if (t.getColor(fila, columnaCentral) == colorAct) {
+            puntuacion += 3; // Mayor peso en el centro
+        } else if (t.getColor(fila, columnaCentral) == oponente) {
+            puntuacion -= 3; // Penalización si el oponente controla el centro
+        }
+    }
+
+    // Evaluación de alineaciones (horizontales, verticales, diagonales)
+    puntuacion += evaluarAlineaciones(t, mida, colorAct, oponente);
+
+    return puntuacion;
 }
 
+private int evaluarAlineaciones(Tauler t, int mida, int colorAct, int oponente) {
+    int puntuacion = 0;
+
+    // Horizontales
+    for (int fila = 0; fila < mida; fila++) {
+        for (int col = 0; col < mida - 3; col++) {
+            puntuacion += evaluarGrupo(t, fila, col, 0, 1, colorAct, oponente);
+        }
+    }
+
+    // Verticales
+    for (int col = 0; col < mida; col++) {
+        for (int fila = 0; fila < mida - 3; fila++) {
+            puntuacion += evaluarGrupo(t, fila, col, 1, 0, colorAct, oponente);
+        }
+    }
+
+    // Diagonales (abajo hacia arriba)
+    for (int fila = 0; fila < mida - 3; fila++) {
+        for (int col = 0; col < mida - 3; col++) {
+            puntuacion += evaluarGrupo(t, fila, col, 1, 1, colorAct, oponente);
+        }
+    }
+
+    // Diagonales (arriba hacia abajo)
+    for (int fila = 3; fila < mida; fila++) {
+        for (int col = 0; col < mida - 3; col++) {
+            puntuacion += evaluarGrupo(t, fila, col, -1, 1, colorAct, oponente);
+        }
+    }
+
+    return puntuacion;
+}
+
+private int evaluarGrupo(Tauler t, int fila, int col, int dirFila, int dirCol, int colorAct, int oponente) {
+    int puntuacion = 0;
+    int fichasPropias = 0;
+    int fichasOponente = 0;
+
+    for (int i = 0; i < 4; i++) {
+        // Validar que no salimos del tablero
+        if (fila + i * dirFila >= t.getMida() || col + i * dirCol >= t.getMida() || fila + i * dirFila < 0 || col + i * dirCol < 0) {
+            return 0;
+        }
+
+        int valorCasilla = t.getColor(fila + i * dirFila, col + i * dirCol);
+        if (valorCasilla == colorAct) {
+            fichasPropias++;
+        } else if (valorCasilla == oponente) {
+            fichasOponente++;
+        }
+    }
+
+    if (fichasPropias > 0 && fichasOponente == 0) {
+        puntuacion += Math.pow(10, fichasPropias); // Incrementa exponencialmente por cada ficha propia
+    } else if (fichasOponente > 0 && fichasPropias == 0) {
+        puntuacion -= Math.pow(10, fichasOponente); // Penaliza exponencialmente por cada ficha del oponente
+    }
+
+    return puntuacion;
+}
+
+    
+    
+    
 }

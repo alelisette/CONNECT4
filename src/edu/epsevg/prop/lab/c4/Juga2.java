@@ -97,10 +97,11 @@ public class Juga2 extends javax.swing.JFrame {
         // Definiu al vostre gust els jugadors a enfrontar.
         //Jugador p1 = new Manual();
         //Jugador p1 = new Aleatori();
-        //Jugador p1 = new Conecta2(8, true);
-        Jugador p1 = new Profe(8, true);
-        Jugador p2 = new Conecta2(8,true);
-        //Jugador p2 = new Profe(8,true);
+        Jugador p1 = new Conecta2(8, true);
+        //Jugador p1 = new Profe(8, true); //6 wins, con la nueva heurística->05
+        
+        //Jugador p2 = new Conecta2(8,true);
+        Jugador p2 = new Profe(8,true);
        // Jugador p2 = new Manual();
        //Jugador p2 = new Aleatori();
 
