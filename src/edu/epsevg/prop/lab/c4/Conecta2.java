@@ -69,7 +69,7 @@ public class Conecta2 implements Jugador, IAuto {
         System.out.println("> Columna triada per tirar la fitxa: " + c);
         System.out.println("> Nodes examinats per fer el moviment: " + _tExplorats);
         System.out.println("> Nodes explorats totals durant la partida: " + _t_ExpT);
-        System.out.println("> Nodes on s'ha calculat l'heurística fins ara:" + _calculsHeuristica);
+        System.out.println("> Nodes on s'ha calculat l'heuristica fins ara:" + _calculsHeuristica);
         return millor_columna;
     }
 
@@ -79,78 +79,83 @@ public class Conecta2 implements Jugador, IAuto {
     }
 
     private int MIN(Tauler t, int columna, int profunditat, int colorAct, int _alpha, int _beta) {
-        int millor_valor = INFINIT;
-        ++_tExplorats;
+    int millor_valor = INFINIT;
+    ++_tExplorats;
 
-        int color = 0;
-        for (int i = t.getMida() - 1; i >= 0; --i) {
-            int c = t.getColor(i, columna);
-            if (c != 0) {
-                color = c;
-                break;
-            }
+    int color = 0;
+    for (int i = t.getMida() - 1; i >= 0; --i) {
+        int c = t.getColor(i, columna);
+        if (c != 0) {
+            color = c;
+            break;
         }
+    }
 
-        if (t.solucio(columna, color)) return millor_valor;
-        else if (profunditat == 0 || !t.espotmoure()) {
-           // return 0;
-           return heuristica(t, colorAct);
-        } else {
-            for (int col = 0; col < t.getMida(); col++) {
-                if (t.movpossible(col)) {
-                    Tauler Taux = new Tauler(t);
-                    Taux.afegeix(col, -colorAct);
-                    int h_a = MAX(Taux, col, profunditat - 1, colorAct, _alpha, _beta);
-                    millor_valor = Math.min(millor_valor, h_a);
-                    if(_poda){
-                        _beta = Math.min(millor_valor, _beta); 
-                        if(_beta <= _alpha){ // PODA
-                            break;
-                        }
+    if (t.solucio(columna, color)) return millor_valor;
+    else if (profunditat == 0 || !t.espotmoure()) {
+        return heuristica(t, colorAct);
+    } else {
+        // Ordre dels nodes: 3, 4, 2, 5, 1, 6, 0, 7
+        int[] ordenColumnas = {3, 4, 2, 5, 1, 6, 0, 7};
+
+        for (int idx = 0; idx < ordenColumnas.length; idx++) {
+            int col = ordenColumnas[idx];
+            if (t.movpossible(col)) {
+                Tauler Taux = new Tauler(t);
+                Taux.afegeix(col, -colorAct);
+                int h_a = MAX(Taux, col, profunditat - 1, colorAct, _alpha, _beta);
+                millor_valor = Math.min(millor_valor, h_a);
+                if (_poda) {
+                    _beta = Math.min(millor_valor, _beta);
+                    if (_beta <= _alpha) { // PODA
+                        break;
                     }
                 }
             }
         }
-        return millor_valor;
+    }
+    return millor_valor;
+}
+
+   private int MAX(Tauler t, int columna, int profunditat, int colorAct, int _alpha, int _beta) {
+    int millor_valor = MENYS_INFINIT;
+    ++_tExplorats;
+    ++_tPartida;
+
+    int color = 0;
+    for (int i = t.getMida() - 1; i >= 0; --i) {
+        int c = t.getColor(i, columna);
+        if (c != 0) {
+            color = c;
+            break;
+        }
     }
 
-    private int MAX(Tauler t, int columna, int profunditat, int colorAct, int _alpha, int _beta) {
-        int millor_valor = MENYS_INFINIT;
-        ++_tExplorats;
-        ++_tPartida;
+    if (t.solucio(columna, color)) return millor_valor;
+    else if (profunditat == 0 || !t.espotmoure()) {
+        return heuristica(t, colorAct);
+    } else {
+        // Ordre dels nodes: 3, 4, 2, 5, 1, 6, 0, 7
+        int[] ordenColumnas = {3, 4, 2, 5, 1, 6, 0, 7};
 
-        //Obtenim l'ultim color de la última fitxa colocada en aquesta columna
-        int color = 0;
-        for (int i = t.getMida() - 1; i >= 0; --i) {
-            int c = t.getColor(i, columna);
-            if (c != 0) {
-                color = c;
-                break;
-            }
-        }
-
-        if (t.solucio(columna, color)) return millor_valor;
-        else if (profunditat == 0 || !t.espotmoure()) {
-            //return 0;
-            return heuristica(t, colorAct);
-        } else {
-            for (int col = 0; col < t.getMida(); ++col) {
-                if (t.movpossible(col)) {
-                    Tauler Taux = new Tauler(t);
-                    Taux.afegeix(col, colorAct);
-                    int h_a = MIN(Taux, col, profunditat - 1, colorAct, _alpha, _beta);
-                    millor_valor = Math.max(millor_valor, h_a);
-                     if (_poda) {
-                        _alpha = Math.max(millor_valor, _alpha);
-                        if (_beta <= _alpha) { // PODA
-                            break;
-                        }
+        for (int idx = 0; idx < ordenColumnas.length; idx++) {
+            int col = ordenColumnas[idx];
+            if (t.movpossible(col)) {
+                Tauler Taux = new Tauler(t);
+                Taux.afegeix(col, colorAct);
+                int h_a = MIN(Taux, col, profunditat - 1, colorAct, _alpha, _beta);
+                millor_valor = Math.max(millor_valor, h_a);
+                if (_poda) {
+                    _alpha = Math.max(millor_valor, _alpha);
+                    if (_beta <= _alpha) { // PODA
+                        break;
                     }
                 }
             }
         }
-        return millor_valor;
     }
+    return millor_valor;
+}
  
     //millor heuristica
     private int heuristica(Tauler t, int colorAct) {
@@ -209,18 +214,21 @@ private int evaluarAlineaciones(Tauler t, int mida, int colorAct, int oponente) 
     return puntuacion;
 }
 
+private static final int[] PUNTUACIONES = {0, 1, 10, 100, 1000};
+
 private int evaluarGrupo(Tauler t, int fila, int col, int dirFila, int dirCol, int colorAct, int oponente) {
-    int puntuacion = 0;
     int fichasPropias = 0;
     int fichasOponente = 0;
 
     for (int i = 0; i < 4; i++) {
-        // Validar que no salimos del tablero
-        if (fila + i * dirFila >= t.getMida() || col + i * dirCol >= t.getMida() || fila + i * dirFila < 0 || col + i * dirCol < 0) {
-            return 0;
+        int nuevaFila = fila + i * dirFila;
+        int nuevaCol = col + i * dirCol;
+
+        if (nuevaFila < 0 || nuevaFila >= t.getMida() || nuevaCol < 0 || nuevaCol >= t.getMida()) {
+            return 0; // Grupo inválido
         }
 
-        int valorCasilla = t.getColor(fila + i * dirFila, col + i * dirCol);
+        int valorCasilla = t.getColor(nuevaFila, nuevaCol);
         if (valorCasilla == colorAct) {
             fichasPropias++;
         } else if (valorCasilla == oponente) {
@@ -229,12 +237,12 @@ private int evaluarGrupo(Tauler t, int fila, int col, int dirFila, int dirCol, i
     }
 
     if (fichasPropias > 0 && fichasOponente == 0) {
-        puntuacion += Math.pow(10, fichasPropias); // Incrementa exponencialmente por cada ficha propia
+        return PUNTUACIONES[fichasPropias];
     } else if (fichasOponente > 0 && fichasPropias == 0) {
-        puntuacion -= Math.pow(10, fichasOponente); // Penaliza exponencialmente por cada ficha del oponente
+        return -PUNTUACIONES[fichasOponente];
     }
 
-    return puntuacion;
-  }
+    return 0;
+    }
     
 }
