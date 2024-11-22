@@ -20,7 +20,7 @@ public class Conecta2 implements Jugador, IAuto {
     //atributs
     private String _nom;
     private Boolean _poda;
-    private int _nJugades, _tPartida, _tExplorats, _profMax, _t_ExpT; //el profe provarà amb profunditat 4 o 8
+    private int _nJugades, _tPartida, _tExplorats, _profMax, _t_ExpT, _calculsHeuristica; //el profe provarà amb profunditat 4 o 8
    //nJugades representa el nombre de moviments que ha realitzat el jugador Conecta2 en la partida
    //_profMax representa el nivell màxim de profunditat on podem simular amb Conecta2
     //constructor jugador Conecta2
@@ -31,6 +31,7 @@ public class Conecta2 implements Jugador, IAuto {
         _tExplorats = 0; //serveix per fer servir la complexitat de l'algoritme en cada torn. 
         //si explora molts taulers en un moviment pot ser hi ha algo mal en la configuració de la profunditat o en la heuristica
         _profMax = profunditatMaxima;
+        _calculsHeuristica = 0;
         _poda = poda;
         
         
@@ -68,6 +69,7 @@ public class Conecta2 implements Jugador, IAuto {
         System.out.println("> Columna triada per tirar la fitxa: " + c);
         System.out.println("> Nodes examinats per fer el moviment: " + _tExplorats);
         System.out.println("> Nodes explorats totals durant la partida: " + _t_ExpT);
+        System.out.println("> Nodes on s'ha calculat l'heurística fins ara:" + _calculsHeuristica);
         return millor_columna;
     }
 
@@ -152,24 +154,25 @@ public class Conecta2 implements Jugador, IAuto {
  
     //millor heuristica
     private int heuristica(Tauler t, int colorAct) {
-    int puntuacion = 0;
-    int mida = t.getMida(); // Tamaño del tablero cuadrado (8x8)
-    int oponente = -colorAct; // Color contrario al actual
+        ++_calculsHeuristica;
+        int puntuacion = 0;
+        int mida = t.getMida(); // Tamaño del tablero cuadrado (8x8)
+        int oponente = -colorAct; // Color contrario al actual
 
-    // Prioridad al centro
-    int columnaCentral = mida / 2;
-    for (int fila = 0; fila < mida; fila++) {
-        if (t.getColor(fila, columnaCentral) == colorAct) {
-            puntuacion += 3; // Mayor peso en el centro
-        } else if (t.getColor(fila, columnaCentral) == oponente) {
-            puntuacion -= 3; // Penalización si el oponente controla el centro
+        // Prioridad al centro
+        int columnaCentral = mida / 2;
+        for (int fila = 0; fila < mida; fila++) {
+            if (t.getColor(fila, columnaCentral) == colorAct) {
+                puntuacion += 3; // Mayor peso en el centro
+            } else if (t.getColor(fila, columnaCentral) == oponente) {
+                puntuacion -= 3; // Penalización si el oponente controla el centro
+            }
         }
-    }
 
-    // Evaluación de alineaciones (horizontales, verticales, diagonales)
-    puntuacion += evaluarAlineaciones(t, mida, colorAct, oponente);
+        // Evaluación de alineaciones (horizontales, verticales, diagonales)
+        puntuacion += evaluarAlineaciones(t, mida, colorAct, oponente);
 
-    return puntuacion;
+        return puntuacion;
 }
 
 private int evaluarAlineaciones(Tauler t, int mida, int colorAct, int oponente) {
