@@ -7,36 +7,58 @@ import java.time.Instant;
 import java.time.Duration;
 
 /**
- *
+ * Clase {@code Conecta2} que implementa un jugador automático para el juego
+ * Conecta 4 utilizando el algoritmo Minimax con poda alfa-beta.
+ * 
+ * Este jugador prioriza movimientos estratégicos en el tablero, como ocupar 
+ * el centro, evitar alineaciones peligrosas y maximizar su puntaje heurístico.
+ * 
+ * Implementa las interfaces {@code Jugador} y {@code IAuto}.
+ * 
  * @author AlejandraLisette
  */
 public class Conecta2 implements Jugador, IAuto {
-    
+    /**
+     * Valor infinito utilizado para inicializar variables en el algoritmo Minimax.
+     */
     int INFINIT = Integer.MAX_VALUE;    //numero gran que representa el infinit
+    /**
+     * Valor negativo infinito utilizado para inicializar variables en el algoritmo Minimax.
+     */
     int MENYS_INFINIT = Integer.MIN_VALUE;    //numero molt petit que representa el menys infinit
-//final int FILAS = 8; // Número de filas
-//final int COLUMNAS = 8; // Número de columnas
-
-    //atributs
-    private String _nom;
-    private Boolean _poda;
-    private int _nJugades, _profMax, _t_ExpT, _calculsHeuristica; //el profe provarà amb profunditat 4 o 8
-   //nJugades representa el nombre de moviments que ha realitzat el jugador Conecta2 en la partida
-   //_profMax representa el nivell màxim de profunditat on podem simular amb Conecta2
-    //constructor jugador Conecta2
+ // Atributos privados
+    private String _nom; // Nombre del jugador
+    private Boolean _poda; // Indica si la poda alfa-beta está habilitada
+    private int _nJugades; // Número de movimientos realizados por el jugador
+    private int _profMax; // Profundidad máxima del árbol de búsqueda
+    private int _calculsHeuristica; // Número de veces que se ha calculado la heurística
+    private static final int[] PUNTUACIONES = {0, 1, 10, 100, 1000}; 
+    //Puntuaciones es una constante que define los valores asignados a configuraciones de fichas en un grupo de 4 posiciones durante
+    //la evaluacion de la heuristica del tablero de Connect4
+     /**
+     * Constructor de la clase {@code Conecta2}.
+     * 
+     * @param profunditatMaxima Profundidad máxima del árbol de búsqueda.
+     * @param poda              Indica si se debe utilizar poda alfa-beta.
+     */
     public Conecta2(int profunditatMaxima, boolean poda) {
         _nom = "conecta2";
         _nJugades = 0;
-        //si explora molts taulers en un moviment pot ser hi ha algo mal en la configuració de la profunditat o en la heuristica
         _profMax = profunditatMaxima;
         _poda = poda;
         _calculsHeuristica = 0;
 
         
     }
-    
-    //metodes de Jugador
-@Override
+     /**
+     * Calcula el próximo movimiento a realizar en el tablero utilizando 
+     * el algoritmo Minimax con poda alfa-beta.
+     * 
+     * @param t     Tablero actual del juego.
+     * @param color Color del jugador (1 o -1).
+     * @return Columna donde se realizará el movimiento.
+     */
+    @Override
     public int moviment(Tauler t, int color) {
         int millor_columna = -1;
         ++_nJugades;
@@ -67,13 +89,28 @@ public class Conecta2 implements Jugador, IAuto {
 
         return millor_columna;
     }
-
+    /**
+     * Retorna el nombre del jugador.
+     * 
+     * @return Nombre del jugador.
+     */
     @Override
     public String nom() {
         return _nom;
     }
- 
-private int MIN(Tauler t, int columna, int profunditat, int colorAct, int _alpha, int _beta) {
+    /**
+     * Método que implementa el paso "MIN" del algoritmo Minimax con o sin poda alfa-beta.
+     * Evalúa el peor caso posible para el jugador actual equivalente a minimizar el valor.
+     * 
+     * @param t            Tablero actual.
+     * @param columna      Columna del último movimiento.
+     * @param profunditat  Profundidad actual del árbol de búsqueda.
+     * @param colorAct     Color del jugador actual.
+     * @param _alpha       Valor alfa (poda máxima).
+     * @param _beta        Valor beta (poda mínima).
+     * @return Evaluación mínima calculada para este nivel del árbol.
+     */
+    private int MIN(Tauler t, int columna, int profunditat, int colorAct, int _alpha, int _beta) {
     int millor_valor = INFINIT;
     int color = 0;
     for (int i = t.getMida() - 1; i >= 0; --i) {
@@ -88,7 +125,7 @@ private int MIN(Tauler t, int columna, int profunditat, int colorAct, int _alpha
     else if (profunditat == 0 || !t.espotmoure()) {
         return heuristica(t, colorAct);
     } else {
-        // Orden específico: 3, 4, 2, 5, 1, 6, 0, 7
+        // Ordre dels nodes a explorar: 3, 4, 2, 5, 1, 6, 0, 7
         int[] ordenColumnas = {3, 4, 2, 5, 1, 6, 0, 7};
 
         for (int idx = 0; idx < ordenColumnas.length; idx++) {
@@ -109,7 +146,18 @@ private int MIN(Tauler t, int columna, int profunditat, int colorAct, int _alpha
     }
     return millor_valor;
 }
-
+    /**
+     * Método auxiliar que implementa el paso "MAX" del algoritmo Minimax con poda alfa-beta.
+     * Evalúa el mejor caso posible para el jugador actual.
+     * 
+     * @param t            Tablero actual.
+     * @param columna      Columna del último movimiento.
+     * @param profunditat  Profundidad actual del árbol de búsqueda.
+     * @param colorAct     Color del jugador actual.
+     * @param _alpha       Valor alfa (poda máxima).
+     * @param _beta        Valor beta (poda mínima).
+     * @return Evaluación máxima calculada para este nivel del árbol.
+     */
     private int MAX(Tauler t, int columna, int profunditat, int colorAct, int _alpha, int _beta) {
     int millor_valor = MENYS_INFINIT;
     int color = 0;
@@ -125,7 +173,7 @@ private int MIN(Tauler t, int columna, int profunditat, int colorAct, int _alpha
     else if (profunditat == 0 || !t.espotmoure()) {
         return heuristica(t, colorAct);
     } else {
-        // Orden específico: 3, 4, 2, 5, 1, 6, 0, 7
+        // Ordre dels nodes a explorar: 3, 4, 2, 5, 1, 6, 0, 7
         int[] ordenColumnas = {3, 4, 2, 5, 1, 6, 0, 7};
 
         for (int idx = 0; idx < ordenColumnas.length; idx++) {
@@ -147,8 +195,14 @@ private int MIN(Tauler t, int columna, int profunditat, int colorAct, int _alpha
     return millor_valor;
 }
 
-    
-    //millor heuristica
+     /**
+     * Calcula la heurística del tablero actual para el jugador dado.
+     * Evalúa factores como control del centro y alineaciones de fichas.
+     * 
+     * @param t        Tablero actual.
+     * @param colorAct Color del jugador actual.
+     * @return Puntuación heurística del tablero.
+     */
     private int heuristica(Tauler t, int colorAct) {
     int puntuacion = 0;
     int mida = t.getMida(); // Tamaño del tablero cuadrado (8x8)
@@ -170,8 +224,17 @@ private int MIN(Tauler t, int columna, int profunditat, int colorAct, int _alpha
 
     return puntuacion;
 }
-
-private int evaluarAlineaciones(Tauler t, int mida, int colorAct, int oponente) {
+    /**
+     * Evalúa las alineaciones (horizontales, verticales y diagonales) en el tablero
+     * y asigna puntuaciones basadas en el número de fichas del jugador y del oponente.
+     * 
+     * @param t        Tablero actual.
+     * @param mida     Tamaño del tablero.
+     * @param colorAct Color del jugador actual.
+     * @param oponente Color del oponente.
+     * @return Puntuación heurística acumulada basada en las alineaciones.
+     */
+    private int evaluarAlineaciones(Tauler t, int mida, int colorAct, int oponente) {
     int puntuacion = 0;
 
     // Horizontales
@@ -204,39 +267,18 @@ private int evaluarAlineaciones(Tauler t, int mida, int colorAct, int oponente) 
 
     return puntuacion;
 }
-
-/*
-private int evaluarGrupo(Tauler t, int fila, int col, int dirFila, int dirCol, int colorAct, int oponente) {
-    int puntuacion = 0;
-    int fichasPropias = 0;
-    int fichasOponente = 0;
-
-    for (int i = 0; i < 4; i++) {
-        // Validar que no salimos del tablero
-        if (fila + i * dirFila >= t.getMida() || col + i * dirCol >= t.getMida() || fila + i * dirFila < 0 || col + i * dirCol < 0) {
-            return 0;
-        }
-
-        int valorCasilla = t.getColor(fila + i * dirFila, col + i * dirCol);
-        if (valorCasilla == colorAct) {
-            fichasPropias++;
-        } else if (valorCasilla == oponente) {
-            fichasOponente++;
-        }
-    }
-
-    if (fichasPropias > 0 && fichasOponente == 0) {
-        puntuacion += Math.pow(10, fichasPropias); // Incrementa exponencialmente por cada ficha propia
-    } else if (fichasOponente > 0 && fichasPropias == 0) {
-        puntuacion -= Math.pow(10, fichasOponente); // Penaliza exponencialmente por cada ficha del oponente
-    }
-
-    return puntuacion;
-  }
-  */
-
-private static final int[] PUNTUACIONES = {0, 1, 10, 100, 1000};
-
+    /**
+     * Evalúa un grupo de 4 fichas en el tablero en la dirección indicada.
+     * 
+     * @param t        Tablero actual.
+     * @param fila     Fila inicial.
+     * @param col      Columna inicial.
+     * @param dirFila  Dirección de la fila (1, -1, o 0).
+     * @param dirCol   Dirección de la columna (1, -1, o 0).
+     * @param colorAct Color del jugador actual.
+     * @param oponente Color del oponente.
+     * @return Puntuación heurística del grupo evaluado.
+     */
 private int evaluarGrupo(Tauler t, int fila, int col, int dirFila, int dirCol, int colorAct, int oponente) {
     int fichasPropias = 0;
     int fichasOponente = 0;
