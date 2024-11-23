@@ -20,20 +20,18 @@ public class Conecta2 implements Jugador, IAuto {
     //atributs
     private String _nom;
     private Boolean _poda;
-    private int _nJugades, _tPartida, _tExplorats, _profMax, _t_ExpT, _calculsHeuristica; //el profe provarà amb profunditat 4 o 8
+    private int _nJugades, _profMax, _t_ExpT, _calculsHeuristica; //el profe provarà amb profunditat 4 o 8
    //nJugades representa el nombre de moviments que ha realitzat el jugador Conecta2 en la partida
    //_profMax representa el nivell màxim de profunditat on podem simular amb Conecta2
     //constructor jugador Conecta2
     public Conecta2(int profunditatMaxima, boolean poda) {
         _nom = "conecta2";
         _nJugades = 0;
-        _tPartida = 0;
-        _tExplorats = 0; //serveix per fer servir la complexitat de l'algoritme en cada torn. 
         //si explora molts taulers en un moviment pot ser hi ha algo mal en la configuració de la profunditat o en la heuristica
         _profMax = profunditatMaxima;
-        _calculsHeuristica = 0;
         _poda = poda;
-        
+        _calculsHeuristica = 0;
+
         
     }
     
@@ -42,8 +40,6 @@ public class Conecta2 implements Jugador, IAuto {
     public int moviment(Tauler t, int color) {
         int millor_columna = -1;
         ++_nJugades;
-        _tExplorats = 0;
-        ++_tPartida;
         Instant inici = Instant.now();
         int h_actual = MENYS_INFINIT;
         int h_alpha = MENYS_INFINIT;
@@ -59,17 +55,16 @@ public class Conecta2 implements Jugador, IAuto {
                 }
             }
         }
-
-        _t_ExpT += _tExplorats;
         Instant fi = Instant.now();
         long duracio = Duration.between(inici, fi).getSeconds();
         int c = millor_columna+1;
 
         System.out.println("> Jugada: " + _nJugades + " amb temps: " + duracio + "s.");
         System.out.println("> Columna triada per tirar la fitxa: " + c);
-        System.out.println("> Nodes examinats per fer el moviment: " + _tExplorats);
-        System.out.println("> Nodes explorats totals durant la partida: " + _t_ExpT);
+       // System.out.println("> Nodes examinats per fer el moviment: " + _tExplorats);
+       // System.out.println("> Nodes explorats totals durant la partida: " + _t_ExpT);
         System.out.println("> Nodes on s'ha calculat l'heuristica fins ara:" + _calculsHeuristica);
+
         return millor_columna;
     }
 
@@ -77,11 +72,9 @@ public class Conecta2 implements Jugador, IAuto {
     public String nom() {
         return _nom;
     }
-
-    private int MIN(Tauler t, int columna, int profunditat, int colorAct, int _alpha, int _beta) {
+ 
+private int MIN(Tauler t, int columna, int profunditat, int colorAct, int _alpha, int _beta) {
     int millor_valor = INFINIT;
-    ++_tExplorats;
-
     int color = 0;
     for (int i = t.getMida() - 1; i >= 0; --i) {
         int c = t.getColor(i, columna);
@@ -95,7 +88,7 @@ public class Conecta2 implements Jugador, IAuto {
     else if (profunditat == 0 || !t.espotmoure()) {
         return heuristica(t, colorAct);
     } else {
-        // Ordre dels nodes: 3, 4, 2, 5, 1, 6, 0, 7
+        // Orden específico: 3, 4, 2, 5, 1, 6, 0, 7
         int[] ordenColumnas = {3, 4, 2, 5, 1, 6, 0, 7};
 
         for (int idx = 0; idx < ordenColumnas.length; idx++) {
@@ -117,11 +110,8 @@ public class Conecta2 implements Jugador, IAuto {
     return millor_valor;
 }
 
-   private int MAX(Tauler t, int columna, int profunditat, int colorAct, int _alpha, int _beta) {
+    private int MAX(Tauler t, int columna, int profunditat, int colorAct, int _alpha, int _beta) {
     int millor_valor = MENYS_INFINIT;
-    ++_tExplorats;
-    ++_tPartida;
-
     int color = 0;
     for (int i = t.getMida() - 1; i >= 0; --i) {
         int c = t.getColor(i, columna);
@@ -135,7 +125,7 @@ public class Conecta2 implements Jugador, IAuto {
     else if (profunditat == 0 || !t.espotmoure()) {
         return heuristica(t, colorAct);
     } else {
-        // Ordre dels nodes: 3, 4, 2, 5, 1, 6, 0, 7
+        // Orden específico: 3, 4, 2, 5, 1, 6, 0, 7
         int[] ordenColumnas = {3, 4, 2, 5, 1, 6, 0, 7};
 
         for (int idx = 0; idx < ordenColumnas.length; idx++) {
@@ -156,28 +146,29 @@ public class Conecta2 implements Jugador, IAuto {
     }
     return millor_valor;
 }
- 
+
+    
     //millor heuristica
     private int heuristica(Tauler t, int colorAct) {
-        ++_calculsHeuristica;
-        int puntuacion = 0;
-        int mida = t.getMida(); // Tamaño del tablero cuadrado (8x8)
-        int oponente = -colorAct; // Color contrario al actual
+    int puntuacion = 0;
+    int mida = t.getMida(); // Tamaño del tablero cuadrado (8x8)
+    int oponente = -colorAct; // Color contrario al actual
+    ++_calculsHeuristica;
 
-        // Prioridad al centro
-        int columnaCentral = mida / 2;
-        for (int fila = 0; fila < mida; fila++) {
-            if (t.getColor(fila, columnaCentral) == colorAct) {
-                puntuacion += 3; // Mayor peso en el centro
-            } else if (t.getColor(fila, columnaCentral) == oponente) {
-                puntuacion -= 3; // Penalización si el oponente controla el centro
-            }
+    // Prioridad al centro
+    int columnaCentral = mida / 2;
+    for (int fila = 0; fila < mida; fila++) {
+        if (t.getColor(fila, columnaCentral) == colorAct) {
+            puntuacion += 3; // Mayor peso en el centro
+        } else if (t.getColor(fila, columnaCentral) == oponente) {
+            puntuacion -= 3; // Penalización si el oponente controla el centro
         }
+    }
 
-        // Evaluación de alineaciones (horizontales, verticales, diagonales)
-        puntuacion += evaluarAlineaciones(t, mida, colorAct, oponente);
+    // Evaluación de alineaciones (horizontales, verticales, diagonales)
+    puntuacion += evaluarAlineaciones(t, mida, colorAct, oponente);
 
-        return puntuacion;
+    return puntuacion;
 }
 
 private int evaluarAlineaciones(Tauler t, int mida, int colorAct, int oponente) {
@@ -214,6 +205,36 @@ private int evaluarAlineaciones(Tauler t, int mida, int colorAct, int oponente) 
     return puntuacion;
 }
 
+/*
+private int evaluarGrupo(Tauler t, int fila, int col, int dirFila, int dirCol, int colorAct, int oponente) {
+    int puntuacion = 0;
+    int fichasPropias = 0;
+    int fichasOponente = 0;
+
+    for (int i = 0; i < 4; i++) {
+        // Validar que no salimos del tablero
+        if (fila + i * dirFila >= t.getMida() || col + i * dirCol >= t.getMida() || fila + i * dirFila < 0 || col + i * dirCol < 0) {
+            return 0;
+        }
+
+        int valorCasilla = t.getColor(fila + i * dirFila, col + i * dirCol);
+        if (valorCasilla == colorAct) {
+            fichasPropias++;
+        } else if (valorCasilla == oponente) {
+            fichasOponente++;
+        }
+    }
+
+    if (fichasPropias > 0 && fichasOponente == 0) {
+        puntuacion += Math.pow(10, fichasPropias); // Incrementa exponencialmente por cada ficha propia
+    } else if (fichasOponente > 0 && fichasPropias == 0) {
+        puntuacion -= Math.pow(10, fichasOponente); // Penaliza exponencialmente por cada ficha del oponente
+    }
+
+    return puntuacion;
+  }
+  */
+
 private static final int[] PUNTUACIONES = {0, 1, 10, 100, 1000};
 
 private int evaluarGrupo(Tauler t, int fila, int col, int dirFila, int dirCol, int colorAct, int oponente) {
@@ -244,5 +265,5 @@ private int evaluarGrupo(Tauler t, int fila, int col, int dirFila, int dirCol, i
 
     return 0;
     }
-    
+
 }
