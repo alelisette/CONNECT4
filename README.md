@@ -1,2 +1,4 @@
 # CONNECT4
-PROP
+Connect 4 in Java
+
+
